@@ -45,22 +45,23 @@ fn error_object() -> impl Strategy<Value = ErrorObject> {
         ".{0,12}",
         prop_oneof![Just(None), json_value().prop_map(Some)],
     )
-        .prop_map(|(code, message, data)| ErrorObject {
-            code,
-            message,
-            data,
+        .prop_map(|(code, message, data)| match data {
+            None => ErrorObject::new(code, message),
+            Some(data) => ErrorObject::new(code, message).with_data(data),
         })
+}
+
+/// A method name outside the reserved `rpc.` prefix.
+fn method() -> impl Strategy<Value = String> {
+    ".{0,12}".prop_filter("reserved prefix", |m| !m.starts_with("rpc."))
 }
 
 fn message() -> impl Strategy<Value = Message> {
     prop_oneof![
-        (id(), ".{0,12}", params()).prop_map(|(id, method, params)| Message::Request(Request {
-            id,
-            method,
-            params
-        })),
-        (".{0,12}", params())
-            .prop_map(|(method, params)| Message::Notification(Notification { method, params })),
+        (id(), method(), params())
+            .prop_map(|(id, method, params)| Message::Request(Request::new(id, method, params))),
+        (method(), params())
+            .prop_map(|(method, params)| Message::Notification(Notification::new(method, params))),
         (id(), json_value())
             .prop_map(|(id, result)| Message::Response(Response::success(id, result))),
         (prop_oneof![Just(None), id().prop_map(Some)], error_object())
@@ -88,6 +89,25 @@ proptest! {
     #[test]
     fn parsing_arbitrary_json_never_panics(value in json_value()) {
         let _ = Message::from_value(value);
+    }
+
+    #[test]
+    fn parsing_arbitrary_text_never_panics(text in ".{0,64}") {
+        if let Err(err) = Message::from_json_str(&text) {
+            // A refused message never produces an error response whose
+            // `error` member is not an object.
+            if let Some(resp) = err.to_response() {
+                let value = Message::Response(resp).to_value();
+                prop_assert!(value["error"].is_object());
+            }
+        }
+    }
+
+    #[test]
+    fn rpc_prefixed_methods_are_always_refused(suffix in ".{0,8}", id in id()) {
+        let method = format!("rpc.{suffix}");
+        let text = Message::Request(Request::new(id, method, None)).to_json_string();
+        prop_assert!(Message::from_json_str(&text).is_err());
     }
 
     #[test]

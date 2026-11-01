@@ -4,7 +4,7 @@ name = "damavand-proto"
 # PR label, so the first `minor` release becomes 0.1.0.
 version = "0.0.0"
 edition = "2024"
-rust-version = "1.99"
+rust-version = "1.85"
 description = "Versioned out-of-process plugin wire protocol (JSON-RPC 2.0) for damavand agent-safety crates"
 license = "Apache-2.0"
 repository = "https://github.com/jamshidhq/damavand-proto"

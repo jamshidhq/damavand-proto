@@ -1,0 +1,28 @@
+[package]
+name = "damavand-proto"
+# 0.0.0 on purpose: rust-release.yaml bumps max(latest tag, this value) by the
+# PR label, so the first `minor` release becomes 0.1.0.
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.99"
+description = "Versioned out-of-process plugin wire protocol (JSON-RPC 2.0) for damavand agent-safety crates"
+license = "Apache-2.0"
+repository = "https://github.com/jamshidhq/damavand-proto"
+readme = "README.md"
+keywords = ["json-rpc", "protocol", "plugin", "agent"]
+categories = ["network-programming", "encoding"]
+
+[features]
+# Reusable conformance test suite for implementations of the protocol.
+conformance = []
+
+[dependencies]
+serde = { version = "1.0.229", features = ["derive"] }
+serde_json = "1.0.154"
+
+[dev-dependencies]
+proptest = { version = "1.12.0", default-features = false, features = ["std"] }
+
+[lints.rust]
+unsafe_code = "forbid"
+missing_docs = "warn"

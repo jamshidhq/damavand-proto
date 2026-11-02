@@ -332,10 +332,10 @@ impl HandshakeServer for AllowsReservedMethods {
 
     fn handle(&mut self, message: &str) -> Option<String> {
         let mut value: Value = serde_json::from_str(message).ok()?;
-        if let Some(method) = value.get("method").and_then(Value::as_str) {
-            if let Some(rest) = method.strip_prefix("rpc.") {
-                value["method"] = json!(format!("x-{rest}"));
-            }
+        if let Some(method) = value.get("method").and_then(Value::as_str)
+            && let Some(rest) = method.strip_prefix("rpc.")
+        {
+            value["method"] = json!(format!("x-{rest}"));
         }
         self.0.handle(&value.to_string())
     }

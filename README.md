@@ -16,8 +16,8 @@ crate is its reference implementation.
 - **Rust API:** can change in any release before 1.0.
 - `serde_json` is a public dependency: its `Value` and `Map` types are part of
   the API.
-- MSRV: Rust 1.85 for the library. The test suite needs Rust 1.88 (the
-  `proptest` dev-dependency).
+- MSRV: Rust 1.89 for the library and tests (the MSRV of the whole damavand
+  family).
 
 ## What is in the crate
 
